@@ -1,0 +1,469 @@
+╔══════════════════════════════════════════════════════════════════════════╗
+║                                                                          ║
+║        SISTEMA DE CONTROLE DE ESTOQUE COM NFC E FSM - TCC UFRR         ║
+║                                                                          ║
+║                    PROTÓTIPO COMPLETO - FEVEREIRO 2026                   ║
+║                                                                          ║
+╚══════════════════════════════════════════════════════════════════════════╝
+
+📦 CONTEÚDO DO PROTÓTIPO
+════════════════════════════════════════════════════════════════════════════
+
+O protótipo desenvolvido inclui:
+
+✅ BACKEND NODE.JS (server.js)
+   - Servidor MQTT conectado ao broker público
+   - Processamento de eventos NFC em tempo real
+   - FSM (Máquina de Estados Finitos) para rastreamento
+   - Sistema de alertas para transições inválidas
+   - WebSocket para comunicação em tempo real
+   - Contador de itens por localização
+   - Detecção de portais offline
+
+✅ DASHBOARD WEB (public/index.html + app.js)
+   - Interface moderna com design industrial/tecnológico
+   - Atualização em tempo real via WebSocket
+   - Estatísticas completas do sistema
+   - Cards de status dos 3 portais
+   - Lista de movimentações recentes
+   - Sistema de alertas visuais e sonoros
+   - Notificações de leitura com localização
+   - Totalmente responsivo
+
+✅ CÓDIGO ESP32 PARA WOKWI (wokwi_portal.ino)
+   - Simulação completa dos 3 portais
+   - ESP32 + simulação NFC (botão)
+   - Publicação MQTT de eventos de leitura
+   - Logs detalhados no Serial Monitor
+
+✅ DOCUMENTAÇÃO COMPLETA
+   - README.md - Documentação principal
+   - QUICKSTART.md - Guia rápido de 5 minutos
+   - Este arquivo - Instruções detalhadas
+
+════════════════════════════════════════════════════════════════════════════
+
+ INÍCIO RÁPIDO (3 PASSOS)
+════════════════════════════════════════════════════════════════════════════
+
+PASSO 1: INSTALAR E EXECUTAR O SERVIDOR
+────────────────────────────────────────
+
+1. Extraia todos os arquivos em uma pasta
+2. Abra o terminal/prompt na pasta
+3. Execute:
+   
+   npm install
+   npm start
+
+4. Aguarde a mensagem:
+   
+   ╔════════════════════════════════════════════════════════╗
+   ║    SERVIDOR CONTROLE DE ESTOQUE - INICIADO          ║
+   ╚════════════════════════════════════════════════════════╝
+
+5. Abra http://localhost:3000 no navegador
+
+PASSO 2: CONFIGURAR WOKWI (3 PORTAIS)
+──────────────────────────────────────
+
+1. Acesse: https://wokwi.com/projects/new/esp32
+
+2. Substitua "sketch.ino" pelo conteúdo de:
+   wokwi_portal.ino
+
+3. Adicione arquivo "libraries.txt":
+   - Clique no "+" ao lado de sketch.ino
+   - Selecione "libraries.txt"
+   - Cole o conteúdo do arquivo libraries.txt
+
+4. Adicione arquivo "diagram.json":
+   - Clique no "+" novamente
+   - Selecione "diagram.json"
+   - Cole o conteúdo do arquivo diagram.json
+
+5. Configure o PORTAL_ID (linha 20 do código):
+   
+   Para Portal 1 (Recebimento):   #define PORTAL_ID 1
+   Para Portal 2 (Estoque):        #define PORTAL_ID 2
+   Para Portal 3 (Expedição):      #define PORTAL_ID 3
+
+6. Abra 3 ABAS do navegador, uma para cada portal
+
+7. Em cada aba, configure um PORTAL_ID diferente
+
+8. Clique em "Start Simulation" nas 3 abas
+
+PASSO 3: TESTAR O SISTEMA
+──────────────────────────
+
+1. Observe o dashboard em http://localhost:3000
+   - Status dos portais deve mudar para "ONLINE"
+   - Estatísticas começam a aparecer
+
+2. No Wokwi, pressione o BOTÃO AZUL para simular leituras NFC
+
+3. Observe no dashboard:
+   ✓ Notificação de leitura aparece
+   ✓ Item é registrado na localização
+   ✓ Contador de itens atualiza
+   ✓ Evento aparece no histórico
+   ✓ Som de notificação toca
+
+4. Teste o fluxo correto (FSM):
+   
+   Portal 1 (Recebimento) 
+      → aguarde 2s → 
+   Portal 2 (Estoque) 
+      → aguarde 2s → 
+   Portal 3 (Expedição)
+
+5. Teste um erro (alerta):
+   
+   Portal 1 → Portal 3 (pula etapa)
+    Alerta de "Transição Inválida" deve aparecer
+
+════════════════════════════════════════════════════════════════════════════
+
+ ESTRUTURA DO PROJETO
+════════════════════════════════════════════════════════════════════════════
+
+sistema-estoque/
+│
+├── server.js              ← Servidor backend Node.js
+├── package.json           ← Dependências do projeto
+│
+├── public/                ← Arquivos do dashboard
+│   ├── index.html         ← Interface HTML
+│   └── app.js             ← JavaScript do cliente
+│
+├── wokwi_portal.ino       ← Código ESP32 para Wokwi
+├── libraries.txt          ← Bibliotecas Wokwi
+├── diagram.json           ← Configuração hardware Wokwi
+│
+├── README.md              ← Documentação completa
+├── QUICKSTART.md          ← Guia rápido
+└── INSTRUCOES.txt         ← Este arquivo
+
+════════════════════════════════════════════════════════════════════════════
+
+FUNCIONALIDADES IMPLEMENTADAS
+════════════════════════════════════════════════════════════════════════════
+
+BACKEND:
+--------
+✅ Conexão MQTT com broker público (broker.hivemq.com)
+✅ Processamento de eventos de leitura NFC
+✅ FSM - Máquina de Estados Finitos
+   - Estados: Recebimento → Estoque → Expedição → Concluído
+✅ Validação de transições de estado
+✅ Sistema de alertas para transições inválidas
+✅ Contador de itens por localização em tempo real
+✅ Histórico de eventos (últimos 100)
+✅ Notificações de leitura com localização
+✅ WebSocket para tempo real
+✅ Detecção de portais offline (timeout de 30s)
+✅ Broadcast para múltiplos clientes simultâneos
+
+DASHBOARD:
+----------
+✅ Design moderno industrial/tecnológico
+✅ 3 cards de status dos portais
+✅ Contador de itens por localização
+✅ Estatísticas em tempo real:
+   - Total de itens rastreados
+   - Total de movimentações
+   - Itens em Recebimento
+   - Itens em Estoque
+   - Itens em Expedição
+   - Itens Concluídos
+✅ Lista de movimentações recentes (últimas 20)
+✅ Sistema de alertas visuais
+✅ Notificações de leitura com localização
+✅ Notificações sonoras
+✅ Indicador de conexão WebSocket
+✅ Timestamps relativos ("30s atrás", "2min atrás")
+✅ Atualização automática sem refresh
+✅ Tema dark com gradientes
+✅ Totalmente responsivo (mobile-friendly)
+✅ Animações e transições suaves
+
+ESP32/WOKWI:
+------------
+✅ Simulação de 3 portais independentes
+✅ Simulação de NFC via botão
+✅ LED de feedback visual
+✅ Rotação de IDs de itens (4 itens diferentes)
+✅ Publicação MQTT instantânea ao pressionar botão
+✅ Logs formatados no Serial Monitor
+✅ Auto-reconexão WiFi e MQTT
+
+════════════════════════════════════════════════════════════════════════════
+
+ FSM - MÁQUINA DE ESTADOS FINITOS
+════════════════════════════════════════════════════════════════════════════
+
+FLUXO VÁLIDO:
+
+┌──────────────┐     ┌──────────────┐     ┌──────────────┐     ┌──────────────┐
+│ Recebimento  │ ──→ │   Estoque    │ ──→ │  Expedição   │ ──→ │  Concluído   │
+└──────────────┘     └──────────────┘     └──────────────┘     └──────────────┘
+      
+REGRAS:
+-------
+✅ Recebimento → Estoque (PERMITIDO)
+✅ Estoque → Expedição (PERMITIDO)
+✅ Expedição → Concluído (PERMITIDO)
+
+❌ Recebimento → Expedição (BLOQUEADO - Pula etapa)
+❌ Estoque → Recebimento (BLOQUEADO - Retrocesso)
+❌ Expedição → Estoque (BLOQUEADO - Retrocesso)
+
+QUANDO OCORRE TRANSIÇÃO INVÁLIDA:
+----------------------------------
+⚠️ Sistema gera ALERTA
+⚠️ Item NÃO muda de estado
+⚠️ Notificação visual no dashboard
+⚠️ Som de alerta diferenciado
+⚠️ Registro no histórico de alertas
+
+════════════════════════════════════════════════════════════════════════════
+
+ CONFIGURAÇÕES OPCIONAIS
+════════════════════════════════════════════════════════════════════════════
+
+ALTERAR PORTA DO SERVIDOR:
+───────────────────────────
+No arquivo server.js, linha 13:
+
+const PORT = 3000;  // Altere para outra porta se necessário
+
+ALTERAR BROKER MQTT:
+────────────────────
+No arquivo server.js, linha 14:
+
+const MQTT_BROKER = 'mqtt://seu-broker.com:1883';
+
+ALTERAR ESTADOS DA FSM:
+────────────────────────
+No arquivo server.js, linhas 79-83:
+
+const ESTADOS_VALIDOS = ['producao', 'camara_fria', 'expedicao', 'concluido'];
+const TRANSICOES_VALIDAS = {
+  'producao': ['camara_fria'],
+  'camara_fria': ['expedicao'],
+  'expedicao': ['concluido']
+};
+
+════════════════════════════════════════════════════════════════════════════
+
+SOLUÇÃO DE PROBLEMAS
+════════════════════════════════════════════════════════════════════════════
+
+
+
+O QUE VOCÊ DEVE VER:
+✅ Título: " Sistema de Controle de Estoque"
+✅ Cards: "Recebimento", "Estoque", "Expedição"
+✅ Métricas: " Itens no Local"
+✅ Seção: " Estatísticas do Sistema"
+
+
+PROBLEMA: Dashboard não conecta
+SOLUÇÃO:
+1. Verifique se o servidor está rodando (npm start)
+2. Verifique o console do navegador (F12)
+3. Confirme que a porta 3000 está livre
+4. Recarregue a página com Ctrl + Shift + R
+
+PROBLEMA: Wokwi não envia dados
+SOLUÇÃO:
+1. Aguarde 10-15 segundos após iniciar simulação
+2. Verifique o Serial Monitor no Wokwi
+3. Procure por "[MQTT] Conectando ao broker... conectado!"
+4. Se não conectar, clique em "Restart" no Wokwi
+
+PROBLEMA: Estatísticas não aparecem
+SOLUÇÃO:
+1. Pressione pelo menos um botão no Wokwi
+2. Aguarde o item ser registrado
+3. Verifique se há dados de lote sendo recebidos
+4. Recarregue a página
+
+PROBLEMA: Biblioteca não encontrada no Wokwi
+SOLUÇÃO:
+1. Certifique-se de criar o arquivo "libraries.txt"
+2. Cole exatamente:
+   PubSubClient
+   ArduinoJson
+3. Salve (Ctrl+S) e reinicie a simulação
+
+════════════════════════════════════════════════════════════════════════════
+
+ RECURSOS ADICIONAIS
+════════════════════════════════════════════════════════════════════════════
+
+VISUALIZAR MENSAGENS MQTT EM TEMPO REAL:
+─────────────────────────────────────────
+1. Acesse: https://www.hivemq.com/demos/websocket-client/
+2. Clique em "Connect"
+3. Em "Subscriptions", adicione: cadeiafrio/#
+4. Clique em "Subscribe"
+5. Veja as mensagens chegando em tempo real!
+
+CONSOLE DO NAVEGADOR (F12):
+───────────────────────────
+- Abra o console para ver logs de conexão WebSocket
+- Mensagens de debug aparecem aqui
+- Útil para desenvolvimento
+
+SERIAL MONITOR DO WOKWI:
+────────────────────────
+- Clique no ícone do terminal embaixo
+- Veja logs detalhados do ESP32
+- Confirmações de publicação MQTT
+
+════════════════════════════════════════════════════════════════════════════
+
+ ARQUITETURA DO SISTEMA
+════════════════════════════════════════════════════════════════════════════
+
+┌─────────────────────────────────────────────────────────────────────────┐
+│                           CAMADA DE HARDWARE                            │
+├─────────────────────────────────────────────────────────────────────────┤
+│                                                                         │
+│  ┌─────────────────┐  ┌─────────────────┐  ┌─────────────────┐        │
+│  │  ESP32 Portal   │  │  ESP32 Portal   │  │  ESP32 Portal   │        │
+│  │  Recebimento    │  │    Estoque      │  │   Expedição     │        │
+│  │                 │  │                 │  │                 │        │
+│  │  Botão NFC      │  │  Botão NFC      │  │  Botão NFC      │        │
+│  │  LED Status     │  │  LED Status     │  │  LED Status     │        │
+│  └────────┬────────┘  └────────┬────────┘  └────────┬────────┘        │
+│           │                    │                    │                  │
+└───────────┼────────────────────┼────────────────────┼──────────────────┘
+            │                    │                    │
+            └────────────────────┼────────────────────┘
+                                 ▼
+┌─────────────────────────────────────────────────────────────────────────┐
+│                        CAMADA DE COMUNICAÇÃO                            │
+├─────────────────────────────────────────────────────────────────────────┤
+│                                                                         │
+│                    MQTT Broker (broker.hivemq.com)                      │
+│                                                                         │
+│     Tópicos:                                                            │
+│     • cadeiafrio/producao/evento                                        │
+│     • cadeiafrio/camara_fria/evento                                     │
+│     • cadeiafrio/expedicao/evento                                       │
+│                                                                         │
+└─────────────────────────────────────────────────────────────────────────┘
+                                 │
+                                 ▼
+┌─────────────────────────────────────────────────────────────────────────┐
+│                         CAMADA DE APLICAÇÃO                             │
+├─────────────────────────────────────────────────────────────────────────┤
+│                                                                         │
+│                      Servidor Node.js (server.js)                       │
+│                                                                         │
+│     ┌───────────────────────────────────────────────────────┐          │
+│     │  MQTT Client                                          │          │
+│     │  • Subscreve: cadeiafrio/#                            │          │
+│     │  • Processa eventos NFC                               │          │
+│     └───────────────────────────────────────────────────────┘          │
+│                                                                         │
+│     ┌───────────────────────────────────────────────────────┐          │
+│     │  FSM (Máquina de Estados)                             │          │
+│     │  • Recebimento → Estoque → Expedição → Concluído      │          │
+│     │  • Valida transições                                  │          │
+│     │  • Gera alertas                                       │          │
+│     └───────────────────────────────────────────────────────┘          │
+│                                                                         │
+│     ┌───────────────────────────────────────────────────────┐          │
+│     │  Estado em Memória                                    │          │
+│     │  • Portais: status, total de itens                    │          │
+│     │  • Lotes: histórico, estado, alertas                  │          │
+│     │  • Eventos: últimos 100                               │          │
+│     │  • Notificações: últimas 20                           │          │
+│     └───────────────────────────────────────────────────────┘          │
+│                                                                         │
+│     ┌───────────────────────────────────────────────────────┐          │
+│     │  WebSocket Server (ws)                                │          │
+│     │  • Broadcast para clientes                            │          │
+│     │  • Tempo real                                         │          │
+│     └───────────────────────────────────────────────────────┘          │
+│                                                                         │
+└─────────────────────────────────────────────────────────────────────────┘
+                                 │
+                                 ▼
+┌─────────────────────────────────────────────────────────────────────────┐
+│                        CAMADA DE APRESENTAÇÃO                           │
+├─────────────────────────────────────────────────────────────────────────┤
+│                                                                         │
+│                  Dashboard Web (index.html + app.js)                    │
+│                                                                         │
+│     ┌───────────────────────────────────────────────────────┐          │
+│     │  WebSocket Client                                     │          │
+│     │  • Conecta ao servidor                                │          │
+│     │  • Recebe atualizações em tempo real                  │          │
+│     └───────────────────────────────────────────────────────┘          │
+│                                                                         │
+│     ┌───────────────────────────────────────────────────────┐          │
+│     │  Interface Gráfica                                    │          │
+│     │  • 3 cards de portais                                 │          │
+│     │  • Estatísticas completas                             │          │
+│     │  • Lista de movimentações                             │          │
+│     │  • Sistema de alertas                                 │          │
+│     │  • Notificações de leitura                            │          │
+│     └───────────────────────────────────────────────────────┘          │
+│                                                                         │
+└─────────────────────────────────────────────────────────────────────────┘
+
+════════════════════════════════════════════════════════════════════════════
+
+ PRÓXIMOS PASSOS SUGERIDOS PARA O TCC
+════════════════════════════════════════════════════════════════════════════
+
+CURTO PRAZO (Para demonstração):
+─────────────────────────────────
+✓ Protótipo funcional completo (PRONTO!)
+☐ Gerar relatórios em PDF
+☐ Adicionar mais itens de teste
+☐ Criar vídeo de demonstração
+☐ Preparar slides para apresentação
+
+MÉDIO PRAZO (Melhorias):
+────────────────────────
+☐ Banco de dados (MongoDB ou PostgreSQL)
+☐ Sistema de autenticação (JWT)
+☐ API REST para consultas
+☐ Relatórios exportáveis (PDF/Excel)
+☐ Histórico persistente de itens
+☐ Dashboard administrativo
+☐ Gráficos de análise temporal
+
+LONGO PRAZO (Produção):
+───────────────────────
+☐ Hardware real (ESP32 + PN532 + antenas NFC)
+☐ Broker MQTT privado (Mosquitto)
+☐ Notificações push (Firebase)
+☐ App mobile (React Native)
+☐ Deploy em nuvem (AWS/Azure)
+☐ Monitoramento (Prometheus + Grafana)
+☐ CI/CD (GitHub Actions)
+☐ Múltiplas filiais/locais
+
+════════════════════════════════════════════════════════════════════════════
+
+ SUPORTE E DOCUMENTAÇÃO
+════════════════════════════════════════════════════════════════════════════
+
+Documentação Completa:    README.md
+Guia Rápido:              QUICKSTART.md
+Este arquivo:             INSTRUCOES.txt
+
+Para mais informações sobre:
+- MQTT: https://mqtt.org
+- Wokwi: https://docs.wokwi.com
+- WebSocket: https://developer.mozilla.org/en-US/docs/Web/API/WebSocket
+- FSM: https://en.wikipedia.org/wiki/Finite-state_machine
+
+════════════════════════════════════════════════════════

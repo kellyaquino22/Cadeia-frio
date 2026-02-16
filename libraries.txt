@@ -1,0 +1,8 @@
+# Wokwi Library List
+# Bibliotecas necessárias para controle de estoque com NFC
+
+# MQTT Client
+PubSubClient
+
+# JSON para Arduino
+ArduinoJson
