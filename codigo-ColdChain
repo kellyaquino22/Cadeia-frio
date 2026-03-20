@@ -1,0 +1,98 @@
+#include <WiFi.h>
+#include <WiFiClientSecure.h>
+#include <PubSubClient.h>
+#include <Wire.h>
+#include <Adafruit_PN532.h>
+
+// --- Configurações de Wi-Fi e MQTT ---
+const char* ssid = "AQUINO";
+const char* password = "0208123840";
+const char* mqtt_server = "9ace28d159244a72b5cbf0a08e02c7d7.s1.eu.hivemq.cloud"; // O mesmo que você usou no Node-RED
+const char* mqtt_user = "hivemq.webclient.1774046277295"; // OBRIGATÓRIO no HiveMQ Cloud
+const char* mqtt_pass = "z;t45qC8>PDaJA6pG*$g";   // OBRIGATÓRIO no HiveMQ Cloud
+
+// --- Pinos do PN532 (Conforme seu código original) ---
+#define SDA_PIN 21
+#define SCL_PIN 22
+#define PN532_IRQ   2
+#define PN532_RESET 3
+
+Adafruit_PN532 nfc(PN532_IRQ, PN532_RESET);
+WiFiClientSecure espClient;
+PubSubClient client(espClient);
+
+void setup() {
+  Serial.begin(115200);
+  
+  // 1. Conectar ao Wi-Fi [cite: 135]
+  WiFi.begin(ssid, password);
+  while (WiFi.status() != WL_CONNECTED) {
+    delay(500);
+    Serial.print(".");
+  }
+  Serial.println("\nWi-Fi Conectado!");
+
+  // 2. Configurar MQTT
+  espClient.setInsecure();
+  client.setServer(mqtt_server, 8883);
+
+  // 3. Iniciar PN532 [cite: 253]
+  Wire.begin(SDA_PIN, SCL_PIN);
+  nfc.begin();
+  uint32_t versiondata = nfc.getFirmwareVersion();
+  if (!versiondata) {
+    Serial.println("PN532 não encontrado!");
+    while (1);
+  }
+  nfc.SAMConfig();
+  Serial.println("Aguardando TAG...");
+}
+
+void reconnect() {
+  while (!client.connected()) {
+  Serial.print("Tentando conectar ao HiveMQ...");
+    if (client.connect("ESP32_ColdChain_Kelly", mqtt_user, mqtt_pass)) {
+      Serial.println("Conectado!");
+    } else {
+      Serial.print("Falha, rc=");
+      Serial.print(client.state()); // Ajuda a identificar o erro
+      Serial.println(" Tentando novamente em 5s");
+      delay(5000);
+    }
+  }
+}
+
+void loop() {
+   if (!client.connected()) reconnect();
+  client.loop();
+  Serial.println("main!");
+
+  
+  uint8_t success;
+  uint8_t uid[] = { 0, 0, 0, 0, 0, 0, 0 };
+  uint8_t uidLength;
+
+  // Tenta ler a tag [cite: 257]
+  success = nfc.readPassiveTargetID(PN532_MIFARE_ISO14443A, uid, &uidLength);
+
+  Serial.println(success);
+
+  if (success) {
+    // Transforma o UID em String para enviar [cite: 259]
+    String uidStr = "";
+    for (uint8_t i = 0; i < uidLength; i++) {
+      uidStr += String(uid[i], HEX);
+    }
+
+    // Cria o JSON  
+    // "setor" pode ser alterado para cada ESP32 (Produção, Câmara Fria, etc)
+    String jsonPayload = "{\"id\":\"" + uidStr + "\", \"setor\":\"Produção\"}";
+    
+    if(client.publish("coldchain/rfid", jsonPayload.c_str())) {
+      Serial.println("Enviado com sucesso: " + jsonPayload);
+    } else {
+      Serial.println("Erro ao publicar!");
+    }
+    delay(3000); 
+  }
+}
